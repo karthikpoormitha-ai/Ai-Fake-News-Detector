@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Fake News Detector</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <div class="card">
+    <h1>📰 AI Fake News Detector</h1>
+    <textarea id="news" placeholder="Paste news here..."></textarea>
+    <button onclick="analyze()">Analyze</button>
+
+    <div id="result"></div>
+    <div class="bar"><div id="bar-fill"></div></div>
+    <p id="source"></p>
+  </div>
+
+  <script src="/static/particles.js"></script>
+  <script>
+    async function analyze() {
+      const news = document.getElementById("news").value;
+      const res = await fetch("/analyze", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({news})
+      });
+      const data = await res.json();
+
+      const badge = data.label === "REAL" ? "green" : "red";
+      document.getElementById("result").innerHTML =
+        `<span class="badge ${badge}">${data.label}</span> ${data.confidence}% confident`;
+
+      document.getElementById("bar-fill").style.width = data.confidence + "%";
+      document.getElementById("source").innerText = "Source hint: " + data.source_hint;
+    }
+  </script>
+</body>
+</html>
